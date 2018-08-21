@@ -1,4 +1,5 @@
 const pg = require('pg');
+const settings = require("./settings");
 
 const config = {
   user: 'vagrant', //env var: PGUSER
@@ -8,7 +9,7 @@ const config = {
   port: 5432 //env var: PGPORT
 };
 
-
+var firstname = process.argv[2];
 
 module.exports = (function() {
 
@@ -17,13 +18,14 @@ module.exports = (function() {
     if (err) throw err;
   })
 
-const getFamousPeople = (peopleName, callback) => {
+const getFamousPeople = (firstName, callback) => {
   let query =
   `select first_name, birthdate
   from famous_people
-  where famous_people.first_name, famous_people.birthdate`;
+  WHERE firstname = 'paul'
+  `;
 
-  db.query(query, [peopleName], (err, result) => {
+  db.query(query, [firstName], (err, result) => {
     if(err) {
       console.log("Something went wrong: ", err);
       callback([]);
