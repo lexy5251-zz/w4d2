@@ -1,62 +1,55 @@
-const pg = require('pg');
-const settings = require("./settings");
+const pg = require("pg");
+const settings = require("./settings"); // settings.json
 
-const config = {
-  user: 'vagrant', //env var: PGUSER
-  database: 'db_test', //env var: PGDATABASE
-  password: 'secret', //env var: PGPASSWORD
-  host: 'localhost',
-  port: 5432 //env var: PGPORT
-};
+const client = new pg.Client({
+  user: settings.user,
+  password: settings.password,
+  database: settings.database,
+  host: settings.hostname,
+  port: settings.port,
+  ssl: settings.ssl
+});
 
-var firstname = process.argv[2];
+// how to use the argv slice
+var firstName = process.argv.slice(2)[0];
 
-module.exports = (function() {
 
-  const db = new pg.Client(config);
-  db.connect((err) => { // Open DB connection
-    if (err) throw err;
-  })
-
-const getFamousPeople = (firstName, callback) => {
-  let query =
-  `select first_name, birthdate
-  from famous_people
-  WHERE firstname = 'paul'
-  `;
-
-  db.query(query, [firstName], (err, result) => {
-    if(err) {
-      console.log("Something went wrong: ", err);
-      callback([]);
-    }
-    else {
-      callback(result.rows);
-    }
-  });
-}
-
-return {
-  getFamousPeople: getFamousPeople,
-  closeEverything: function() {
-    db.end();
+client.connect(err => {
+  if (err) {
+    return console.error("Connection Error", err);
   }
-}
 
-})()
+  client.query(
+    "SELECT * FROM famous_people WHERE first_name = $1::text",
+    [firstName],
+    (err, result) => {
+      if (err) {
+        return console.error("error running query", err);
+      }
 
-// CREATE TABLE famous_people (
-//   id BIGSERIAL PRIMARY KEY,
-//   first_name VARCHAR(50),
-//   last_name VARCHAR(50),
-//   birthdate DATE
-// );
+      function countPeople (arr) {
+        for (var i = 0; i < arr.length; i++) {
 
-// INSERT INTO famous_people (first_name, last_name, birthdate)
-//   VALUES ('Abraham', 'Lincoln', '1809-02-12');
-// INSERT INTO famous_people (first_name, last_name, birthdate)
-//   VALUES ('Mahatma', 'Gandhi', '1869-10-02');
-// INSERT INTO famous_people (first_name, last_name, birthdate)
-//   VALUES ('Paul', 'Rudd', '1969-04-06');
-// INSERT INTO famous_people (first_name, last_name, birthdate)
-//   VALUES ('Paul', 'Giamatti', '1967-06-06');
+        }
+        return i;
+      }
+
+       console.log(`Searching ...\nFound ${countPeople(result.rows)} person(s) by the name '${firstName}':`);
+
+
+      for (var i = 0; i < result.rows.length; i++) {
+        let a = result.rows[i];
+        var date = new Date(a.birthdate);
+        var month = date.getUTCMonth() + 1;
+        var day = date.getUTCDate();
+        var year = date.getUTCFullYear();
+
+        newdate = year + "-" + month + "-" + day;
+      console.log(
+        `- ${i+1}: ${firstName} ${a.last_name}, born ${newdate}`);
+      }
+
+      client.end();
+    }
+  );
+});
