@@ -1,13 +1,11 @@
-const pg = require("pg");
-const settings = require("./settings"); // settings.json
-
-const client = new pg.Client({
-  user: settings.user,
-  password: settings.password,
-  database: settings.database,
-  host: settings.hostname,
-  port: settings.port,
-  ssl: settings.ssl
+var knex = require('knex')({
+  client: 'mysql',
+  connection: {
+    host : '127.0.0.1',
+    user : 'your_database_user',
+    password : 'your_database_password',
+    database : 'myapp_test'
+  }
 });
 
 // how to use the argv slice
@@ -26,6 +24,7 @@ client.connect((err) => {
       if (err) {
         return console.error("error running query", err);
       }
+
       function countPeople (arr) {
         for (var i = 0; i < arr.length; i++) {
 
